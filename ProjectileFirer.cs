@@ -10,6 +10,9 @@ public class ProjectileFirer : MonoBehaviour
     public string targetTag = "Enemy"; // Tag to detect valid targets
     public float firingAngle = 30f; // Angle in degrees within which the projectile can fire
 
+    [Tooltip("Offset for the projectile's spawn position relative to the firing object")]
+    public Vector3 projectileSpawnOffset = new Vector3(0f, 0.5f, 1f); // Editable offset in the Inspector
+
     private float attackCooldown = 0f; // Tracks time since the last attack
 
     // UnityEvent to notify listeners when a projectile is fired
@@ -22,6 +25,7 @@ public class ProjectileFirer : MonoBehaviour
             OnProjectileFiredEvent = new UnityEvent();
         }
     }
+
     void Update()
     {
         attackCooldown -= Time.deltaTime; // Decrease cooldown over time
@@ -49,14 +53,17 @@ public class ProjectileFirer : MonoBehaviour
     {
         if (projectilePrefab != null)
         {
-            // Instantiate the projectile at the current position and rotation of this object
-            GameObject projectile = Instantiate(projectilePrefab, transform.position, transform.rotation);
+            // Calculate the spawn position with the offset
+            Vector3 spawnPosition = transform.position + transform.TransformDirection(projectileSpawnOffset);
+
+            // Instantiate the projectile at the calculated position and rotation of this object
+            GameObject projectile = Instantiate(projectilePrefab, spawnPosition, transform.rotation);
             Rigidbody rb = projectile.GetComponent<Rigidbody>();
 
             if (rb != null)
             {
                 // Apply velocity to the projectile
-                rb.velocity = transform.forward * throwSpeed;
+                rb.linearVelocity = transform.forward * throwSpeed;
 
                 Debug.Log("Projectile fired!");
 
